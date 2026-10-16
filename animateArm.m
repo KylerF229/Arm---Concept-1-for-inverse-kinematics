@@ -1,5 +1,15 @@
 function animateArm(q_des,t,p,numberRuns,L_gripper)
+% ANIMATION ON/OFF
 
+if p.plotOutputs == 0 || p.plot.animation == 0
+    return
+end
+
+N=length(t);
+
+if nargin<5
+L_gripper=0.15;
+end
 N=length(t);
 
 if nargin<5

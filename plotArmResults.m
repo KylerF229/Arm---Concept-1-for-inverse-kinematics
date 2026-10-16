@@ -1,6 +1,8 @@
 function plotArmResults(t,q_des,dq_des,ddq_des,Q_required,Q_inertia,Q_velocity,Q_gravity,p,L_gripper)
 
-N = length(t);
+if p.plotOutputs == 0
+    return
+end
 
 q1 = q_des(:,1);
 q2 = q_des(:,2);
@@ -27,6 +29,7 @@ dq2_deg = rad2deg(dq2);
 dq3_deg = rad2deg(dq3);
 
 % JOINT ANGLES
+if p.plot.jointAngles
 figure
 plot(t,q1_deg,'LineWidth',2)
 hold on
@@ -37,8 +40,10 @@ xlabel('Time (s)')
 ylabel('Angle (deg)')
 legend({'Joint 1','Joint 2','Joint 3'},'Location','best')
 title('Joint Angles')
+end
 
 % JOINT VELOCITIES
+if p.plot.jointVelocities
 figure
 plot(t,dq1,'LineWidth',2)
 hold on
@@ -49,8 +54,10 @@ xlabel('Time (s)')
 ylabel('Angular Velocity (rad/s)')
 legend({'Joint 1','Joint 2','Joint 3'},'Location','best')
 title('Joint Angular Velocities')
+end
 
 % JOINT ACCELERATIONS
+if p.plot.jointAccelerations
 figure
 plot(t,ddq1,'LineWidth',2)
 hold on
@@ -61,8 +68,10 @@ xlabel('Time (s)')
 ylabel('Angular Acceleration (rad/s^2)')
 legend({'Joint 1','Joint 2','Joint 3'},'Location','best')
 title('Joint Angular Accelerations')
+end
 
 % REQUIRED MOTOR TORQUES
+if p.plot.requiredTorque
 figure
 plot(t,T1,'LineWidth',2)
 hold on
@@ -73,8 +82,10 @@ xlabel('Time (s)')
 ylabel('Torque (N*m)')
 legend({'Motor 1','Motor 2','Motor 3'},'Location','best')
 title('Required Motor Torque')
+end
 
 % MOTOR 1 TORQUE BREAKDOWN
+if p.plot.motor1Breakdown
 figure
 plot(t,Q_inertia(:,1),'LineWidth',2)
 hold on
@@ -86,8 +97,10 @@ xlabel('Time (s)')
 ylabel('Torque (N*m)')
 legend({'Inertia','Velocity','Gravity','Total'},'Location','best')
 title('Motor 1 Torque Breakdown')
+end
 
 % MOTOR 2 TORQUE BREAKDOWN
+if p.plot.motor2Breakdown
 figure
 plot(t,Q_inertia(:,2),'LineWidth',2)
 hold on
@@ -99,8 +112,10 @@ xlabel('Time (s)')
 ylabel('Torque (N*m)')
 legend({'Inertia','Velocity','Gravity','Total'},'Location','best')
 title('Motor 2 Torque Breakdown')
+end
 
 % MOTOR 3 TORQUE BREAKDOWN
+if p.plot.motor3Breakdown
 figure
 plot(t,Q_inertia(:,3),'LineWidth',2)
 hold on
@@ -112,8 +127,10 @@ xlabel('Time (s)')
 ylabel('Torque (N*m)')
 legend({'Inertia','Velocity','Gravity','Total'},'Location','best')
 title('Motor 3 Torque Breakdown')
+end
 
 % JOINT 1 POSITION AND VELOCITY
+if p.plot.joint1PosVel
 figure
 yyaxis left
 plot(t,q1_deg,'LineWidth',2)
@@ -125,8 +142,10 @@ grid on
 xlabel('Time (s)')
 legend({'Position','Velocity'},'Location','best')
 title('Joint 1 Position and Velocity')
+end
 
 % JOINT 2 POSITION AND VELOCITY
+if p.plot.joint2PosVel
 figure
 yyaxis left
 plot(t,q2_deg,'LineWidth',2)
@@ -138,8 +157,10 @@ grid on
 xlabel('Time (s)')
 legend({'Position','Velocity'},'Location','best')
 title('Joint 2 Position and Velocity')
+end
 
 % JOINT 3 POSITION AND VELOCITY
+if p.plot.joint3PosVel
 figure
 yyaxis left
 plot(t,q3_deg,'LineWidth',2)
@@ -151,8 +172,10 @@ grid on
 xlabel('Time (s)')
 legend({'Position','Velocity'},'Location','best')
 title('Joint 3 Position and Velocity')
+end
 
 % COMPARISON OF JOINT POSITIONS
+if p.plot.comparePositions
 figure
 plot(t,q1_deg,'LineWidth',2)
 hold on
@@ -163,8 +186,10 @@ xlabel('Time (s)')
 ylabel('Joint Position (deg)')
 legend({'Joint 1','Joint 2','Joint 3'},'Location','best')
 title('Comparison of Joint Positions')
+end
 
 % COMPARISON OF JOINT VELOCITIES
+if p.plot.compareVelocities
 figure
 plot(t,dq1_deg,'LineWidth',2)
 hold on
@@ -175,8 +200,10 @@ xlabel('Time (s)')
 ylabel('Angular Velocity (deg/s)')
 legend({'Joint 1','Joint 2','Joint 3'},'Location','best')
 title('Comparison of Joint Velocities')
+end
 
 % MAXIMUM TORQUE CONTRIBUTIONS
+if p.plot.maxTorqueContributions
 T1_inertia_max = max(abs(Q_inertia(:,1)));
 T1_velocity_max = max(abs(Q_velocity(:,1)));
 T1_gravity_max = max(abs(Q_gravity(:,1)));
@@ -201,24 +228,16 @@ ylabel('Maximum Torque Contribution (N*m)')
 xticklabels({'Motor 1','Motor 2','Motor 3'})
 legend({'Inertia M(q)qdd','Velocity C(q,qd)qd','Gravity G(q)'},'Location','best')
 title('Maximum Motor Torque Contributions')
-
-% END EFFECTOR POSITION
-x_end = zeros(N,1);
-y_end = zeros(N,1);
-
-for i = 1:N
-
-    x1 = p.L1*cos(q1(i));
-    y1 = p.L1*sin(q1(i));
-
-    x2 = x1 + p.L2*cos(q2(i));
-    y2 = y1 + p.L2*sin(q2(i));
-
-    x_end(i) = x2 + L_gripper*cos(q3(i));
-    y_end(i) = y2 + L_gripper*sin(q3(i));
-
 end
 
+% END EFFECTOR POSITION CALCULATIONS
+if p.plot.endPosition || p.plot.endTrajectory
+x_end = p.L1*cos(q1)+p.L2*cos(q2)+L_gripper*cos(q3);
+y_end = p.L1*sin(q1)+p.L2*sin(q2)+L_gripper*sin(q3);
+end
+
+% END EFFECTOR POSITION
+if p.plot.endPosition
 figure
 plot(t,x_end,'LineWidth',2)
 hold on
@@ -228,8 +247,10 @@ xlabel('Time (s)')
 ylabel('Position (m)')
 legend({'X Position','Y Position'},'Location','best')
 title('End Effector Position')
+end
 
 % END EFFECTOR TRAJECTORY
+if p.plot.endTrajectory
 figure
 plot(x_end,y_end,'LineWidth',2)
 hold on
@@ -241,5 +262,6 @@ xlabel('X Position (m)')
 ylabel('Y Position (m)')
 legend({'End Effector Path','Start','Finish'},'Location','best')
 title('End Effector Trajectory')
+end
 
 end
